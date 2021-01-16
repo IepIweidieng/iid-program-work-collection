@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<!-- fade_to_test.html
+Written by Iweidieng Iep on 2019-09-19
+Rev.1 by Iweidieng Iep on 2019-09-19
+   - For Firefox: Work around for `circle` not supporting some style properties
+   - For Firefox: Work around for the border of `svg_fade` being too large
+   - For Chrome: Work around for weird outlines around `svg_fade`
+   - Clip `svg_fade` to improve the performance
+   - Refine indentation
+   - Replace some inline CSSs with internal CSSs
+   - Refactor out hardcoded numbers
+   - Display `fade to` effect only when pressing mouse keys
+Rev.2 by Iweidieng Iep on 2019-09-19
+   - For Firefox 60: `svg_fade_mask_circle`: Attributes `cx`, `cy`, & `r`: Replace CSS variables with equivalent percentages
+   - `svg_fade_mask_circle`: Remove CSS properties `cx`, `cy`, & `r` for Chrome
+Rev.3 by Iweidieng Iep on 2019-09-19
+   - Use `requestAnimationFrame()` to updating `fade to` effect [Ref: gholk `fade_to_test_dom_gfix.html`]
+Rev.4 by Iweidieng Iep on 2019-09-20
+   - Refactor and optimize script code
+   - Reduce the sccpe of CSS variables
+   - `svg_fade`: Use `vmax` unit for `border-width`
+   - Handle page scrolling correctly
+-->
+<html>
+    <head>
+        <style>
+:root {
+    --highlight_radius: 3em;
+    --blur_radius: 4px;  /* Using odd pixels causes weird outlines */
+    --fade_to_color: black;
+    --fade_to_opacity: 0.8;
+}
+#svg_fade_container {
+    z-index: 999999999;
+    position: fixed;
+    top: 0px; bottom: 0px; left: 0px; right: 0px;
+    max-width: 100vw; max-height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+#svg_fade_container.show {opacity: var(--fade_to_opacity);}
+#svg_fade {
+    --fade_to_x: -100vw;
+    --fade_to_y: -100vh;
+    --fade_to_radius: calc(var(--highlight_radius) + var(--blur_radius));
+    --fade_to_width: calc(2*var(--fade_to_radius));
+    width: var(--fade_to_width); height: var(--fade_to_width);
+    border: 1e+04vmax solid var(--fade_to_color);
+    filter: blur(var(--blur_radius));
+    transform: translate(var(--fade_to_x), var(--fade_to_y));
+}
+        </style>
+    </head>
+    <body>
+        <div id="svg_fade_container">
+            <svg id="svg_fade">
+                <mask id="svg_fade_mask">
+                    <rect width="100%" height="100%" fill="white"/>
+                    <circle id="svg_fade_mask_circle" cx="50%" cy="50%" r="50%" fill="black"/>
+                </mask>
+                <rect id="svg_fade_rect" width="100%" height="100%" fill="var(--fade_to_color)" mask="url(#svg_fade_mask)"/>
+            </svg>
+        </div>
+        <h1>asdfjkl;asdjfkl;asdjfkl;asdjfkl;</h1>
+        <p>asdfajsdf;asdf;asdf;ad;asdfasksj;kfjasdkfj;aksdj;fkaj;sdkfjasd;fkja;sdkfj;af;aksjdf;kasdj;fksdj;fkasjf;ksdja;fkalsjd;fkjsdfja;sdkfj;sdkj;askldfj;kasjd;fkja;sdkjf;k;asd;fk;aklsd;fjka;sdkfj;asjdfsdfsda;j;kjsdkj ;kjsd;kfjasdkfjasdfkj int main() { return 0; }</p>
+        <script>
+const tag_html = document.documentElement;
+const tag_body = document.getElementsByTagName("body")[0];
+let svg_fade = document.getElementById("svg_fade");
+let svg_fade_container = document.getElementById("svg_fade_container");
+// Align to a 4-pixel grid to eliminate weird outlines on Chrome
+let fade_pos = [0, 0];
+const update_fade_pos = (e) =>
+    fade_pos = [e.pageX - tag_html.scrollLeft - tag_body.scrollLeft, e.pageY - tag_html.scrollTop - tag_body.scrollTop];
+const update_fade_fx = (t) =>
+{
+    const fade_rect = svg_fade.getBoundingClientRect();
+    svg_fade.style.setProperty("--fade_to_x", `${4 * ((fade_pos[0] - fade_rect.width/2) >> 2)}px`);
+    svg_fade.style.setProperty("--fade_to_y", `${4 * ((fade_pos[1] - fade_rect.height/2) >> 2)}px`);
+    window.requestAnimationFrame(update_fade_fx);
+};
+document.addEventListener("mousedown", (e) =>
+{
+    update_fade_pos(e);
+    svg_fade_container.classList.add("show");
+    document.addEventListener("mousemove", update_fade_pos);
+});
+document.addEventListener("mouseup", (e) =>
+{
+    document.removeEventListener("mousemove", update_fade_pos);
+    svg_fade_container.classList.remove("show");
+});
+update_fade_fx();
+        </script>
+    </body>
+</html>
