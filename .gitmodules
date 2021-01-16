@@ -1,0 +1,6 @@
+[submodule "Test-C++/simple_type_erasure/nvwa-master"]
+	url = https://github.com/adah1972/nvwa.git
+	path = Test-C++/simple_type_erasure/nvwa-master
+[submodule "c_cxx/cmcstl2"]
+	url = https://github.com/CaseyCarter/cmcstl2.git
+	path = c_cxx/cmcstl2
