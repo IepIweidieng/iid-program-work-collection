@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1497793275 source:d:\mandy\documents\rest projects\test-c++\reg\test009~vector-based big number\main.cpp
+	<iostream>
+	<fstream>
+	<vector>
+	<string>
+	<stdexcept>
+

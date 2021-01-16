@@ -1,0 +1,39 @@
+*   "Important issue"
+  ? "Missing stuff"
+  - "Not used stuff"
+
+
+In project
+  ? star_missle.h
+        The head file is missing.
+
+In ball.h & ball.cpp
+  - unsigned int ball::get_rad()
+  - void ball::change_rad(int rad)
+        The member functions are not used.
+
+
+In mulan_missle.cpp
+  - class mulan_missle
+        No objects of the class are created.
+
+    void mlm_single_twin_update(const pos *mass_heart,vec *mass_heart_vec,pos &twins,const double routine,double V,const int num)
+      - The first parameter "const pos *mass_heart" is not used in this function.
+
+  - void mulan_missle::missle_initialize(double p_x,double p_y)
+  - void mulan_missle::move(double V)
+        The member functions are not used.
+
+
+In pattern.h & pattern.cpp
+*   pos G_v_change_amount(pos big,pos lit,double V)
+    pos G_force(const pos obj_1,const int m1,const pos obj_2,const int m2)
+    double cos(vec a,vec b)
+    vec rotation(vec a,vec b)
+    *   Division by zero probably occurs in those functions but is not handled.
+
+  - pos G_v_change_amount(pos big,pos lit,double V)
+  - pos G_force(const pos obj_1,const int m1,const pos obj_2,const int m2)
+  - pos to_pos(double _x = 0, double _y = 0)
+  - vec to_vec(double _x = 0, double _y = 0)
+        The functions are not used.

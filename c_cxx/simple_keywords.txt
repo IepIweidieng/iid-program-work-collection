@@ -1,0 +1,170 @@
+#include 
+<iostream>
+<string>
+<vector>
+<algorithm>
+
+<cstdio>
+<cstdlib>
+<cmath>
+
+#if 
+#ifdef 
+#ifndef 
+#elif 
+#else
+#endif
+
+
+#define 
+#undef 
+
+#error 
+
+using
+using namespace
+using namespace std;
+
+template <?> 
+typename
+
+extern 
+static 
+const 
+
+long 
+short 
+unsigned 
+signed 
+
+typedef 
+
+auto 
+bool 
+char 
+double 
+float 
+int 
+void 
+
+main
+
+()
+{
+    return 0;
+}
+
+class
+struct
+
+public:
+protected:
+private:
+friend 
+this
+
+union 
+enum 
+
+cin
+cout
+endl
+
+true
+false
+nullptr
+
+'?'
+"?"
+
+ + 
+ - 
+ * 
+ / 
+ % 
+ bitand 
+ & 
+ bitor 
+ | 
+ xor 
+ ^ 
+ << 
+ >> 
+
+ = 
+ += 
+ -= 
+ *= 
+ /= 
+ %= 
+ &= 
+ |= 
+ ^= 
+ <<= 
+ >>= 
+
+++
+--
+
++
+-
+compl 
+~
+not 
+!
+
+ and 
+ && 
+ or 
+ || 
+ eq 
+ == 
+ not_eq 
+ != 
+ < 
+ > 
+ <= 
+ >= 
+
+[?]
+*
+&
+->
+.
+
+(?)
+, 
+
+? 
+: 
+
+static_cast<?>(?)
+const_cast<?>(?)
+
+sizeof 
+sizeof(?)
+
+new 
+delete 
+delete[] 
+
+if
+else if 
+else
+
+switch
+for
+while
+do
+try
+catch (?)
+
+case ?:
+default:
+break;
+
+continue;
+goto
+return
+return;
+throw

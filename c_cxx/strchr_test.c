@@ -1,0 +1,275 @@
+/* strchr_test.c
+An attempt to address the `strchr` problem of constness
+   for GNU C99 and ISO C++11.
+This program conforms to C90+ and C++98+, with or without GNU extensions.
+
+`strchr` problem: 
+
+Utility macros for type-checking casting and warning suppression:
+   * `CONST_CAST(Type, ptr)`: Behavior like `const_cast` in C++
+      * Ensure type compatibility and ignore const correctness
+      * For pointer types only
+   * `STATIC_CAST(Type, ptr)`: Behavior like `static_cast` in C++
+      * Ensure type compatibility and const correctness
+   * `REINTERPRET_CAST(Type, ptr)`: Behavior like `reinterpret_cast` in C++
+      * Ignore type compatibility and ensure const correctness
+      * For pointer types only
+
+Utility macros for addressing the `strchr` problem of constness:
+   * `INOUT_RET(srcptr, funccall)`
+      * Usage: `#define func_MACRO(instr)  INOUT_RET(instr, func(instr))`
+      * The defined function macro will cast the result of the function call
+           into the type and constness of `instr`
+      * Ensure that const strings passed to the function cannot be modified by the caller
+      * Non-const strings passed to the function can still be modified by the caller
+   * `INOUT_ARG(srcptr, pdestptr)`
+      * Usage: `#define func_MACRO(instr, pdestptr)  func(instr, INOUT_ARG(instr, pdestptr))`
+      * Check and forbid the situation
+           where `instr` is a const string
+           but `destptr` (pointed by `pdestptr`) is a pointer to non-const bytes
+      * Ensure that const strings passed to the function cannot be modified using `outptr`
+      * Non-const strings passed to the function can still be modified using `outptr`
+
+This has been tested on GCC with version 5.5.0, 7.4.0, and 8.3.0;
+   and on Clang with version 3.9.1, 6.0.0, and 8.0.0
+Compiling this with ISO C++11+ standard should always work as intended.
+
+Written by IepIweidieng Iep on 2019-08-24.
+Rev.1 by IepIweidieng Iep on 2019-08-26.
+*/
+
+#include <string.h>
+
+/* Header code */
+
+#if defined __GNUC__ && __STRICT_ANSI__ + 0 == 0
+  #define CPP_STRICT_ANSI  0
+#else
+  #define CPP_STRICT_ANSI  1
+#endif
+
+#if __cplusplus >= 201103L
+  #include <type_traits>
+
+template <class Type>
+  using Cpp_Decay_T = typename std::decay<Type>::type;
+  #define CPP_DECAY_T(Type)  Cpp_Decay_T<Type>
+  #define CPP_V_TYPEOF(...)  CPP_DECAY_T(decltype(__VA_ARGS__))
+
+template <class Type>
+  using Cpp_Remove_Ptr_T = typename std::remove_pointer<Type>::type;
+  #define CPP_REMOVE_PTR_T(Type)  Cpp_Remove_Ptr_T<Type>
+
+template <class Type>
+  using Cpp_Add_P_T = typename std::add_pointer<Type>::type;
+  #define CPP_ADD_P_T(Type)  Cpp_Add_P_T<Type>
+
+template <class Type>
+  using Cpp_Add_Cp_T = Cpp_Add_P_T<typename std::add_const<Type>::type>;
+  #define CPP_ADD_CP_T(Type)  Cpp_Add_Cp_T<Type>
+
+  #define CPP_V_DECAY(val)  static_cast<CPP_V_TYPEOF(val)>(val)
+#elif !CPP_STRICT_ANSI
+  #define CPP_V_TYPEOF  __typeof__
+  #define CPP_REMOVE_PTR_T(Type)  __typeof__(*(__typeof__(Type))0)
+  #define CPP_ADD_P_T(Type)  __typeof__(Type) *
+  #define CPP_ADD_CP_T(Type)  const __typeof__(Type) *
+  #define CPP_V_DECAY(val)  ((void)0, val)
+#endif
+#if __cplusplus >= 201103L || !CPP_STRICT_ANSI
+  #define CPP_CP_T(Type)  CPP_ADD_CP_T(CPP_REMOVE_PTR_T(Type))
+  #define CPP_PP_T(Type)  CPP_ADD_P_T(CPP_ADD_P_T( \
+      CPP_V_TYPEOF((CPP_REMOVE_PTR_T(CPP_REMOVE_PTR_T(Type)))(char)0)))
+  #define CPP_V_PP_T(val)  CPP_PP_T(CPP_V_TYPEOF(val))
+#endif
+
+#define CPP_ORIG(x)  (x)  /* Prevent function macro `x` from expansion */
+#define CPP_DEFER(f, args)  f args  /* Invoke `f` with `args` after expansion of both */
+#define CPP_STR(x)  #x  /* Stringify after expansion */
+
+#ifdef __cplusplus
+  #define CONST_CAST(Type, ptr)  const_cast<Type>(ptr)
+  #define STATIC_CAST(Type, x)  static_cast<Type>(x)
+  #define REINTERPRET_CAST(Type, ptr)  reinterpret_cast<Type>(ptr)
+#elif !CPP_STRICT_ANSI && __STDC_VERSION__ >= 199901L
+  #define CPP_PRAGMA_ID()  _Pragma
+  #define CPP_PRAGMA(x)  CPP_DEFER(CPP_PRAGMA_ID, ())(x)
+
+  #define CPP_PRAGMA_DX_W_STR(option, empty) \
+      CPP_STR(GCC##empty diagnostic##empty option)
+  #define CPP_PRAGMA_DX_SET_W(option) \
+      CPP_PRAGMA(CPP_PRAGMA_DX_W_STR(option,))
+
+  #define CPP_PRAGMA_DX_IGNORE_PRAGMA_WARNING()  \
+      _Pragma("GCC diagnostic ignored \"-Wpragmas\"") \
+      _Pragma("GCC diagnostic ignored \"-Wunknown-warning-option\"")
+
+  #ifdef __clang__
+    #define CPP_PRAGMA_DX_SOFT_ERROR_W_INCOMPAT_PTR_TYPE() \
+        _Pragma("GCC diagnostic error \"-Wincompatible-pointer-types\"")
+    #define CPP_PRAGMA_DX_W_DISCARD_QUALIFIER \
+      "-Wincompatible-pointer-types-discards-qualifiers"
+  #else
+    #define CPP_PRAGMA_DX_SOFT_ERROR_W_INCOMPAT_PTR_TYPE() \
+        _Pragma("GCC diagnostic warning \"-Wincompatible-pointer-types\"")
+    #define CPP_PRAGMA_DX_W_DISCARD_QUALIFIER  "-Wdiscarded-qualifiers"
+  #endif
+
+  /* Cannot be used as an argument to other `*_CAST()`s when compiled with GCC */
+  #define CPP_UN_CAST(x)  \
+      __extension__ ({ \
+        _Pragma("GCC diagnostic push") \
+          _Pragma("GCC diagnostic ignored \"-Wwrite-strings\"") \
+          _Pragma("GCC diagnostic ignored \"-Wpointer-sign\"") \
+          _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types\"") \
+          CPP_PRAGMA_DX_SET_W(ignored CPP_PRAGMA_DX_W_DISCARD_QUALIFIER) \
+          _Pragma("GCC diagnostic ignored \"-Wcast-qual\"") \
+          _Pragma("GCC diagnostic warning \"-Wwrite-strings\"") \
+          _Pragma("GCC diagnostic warning \"-Wpointer-sign\"") \
+          _Pragma("GCC diagnostic warning \"-Wincompatible-pointer-types\"") \
+          CPP_PRAGMA_DX_SET_W(warning CPP_PRAGMA_DX_W_DISCARD_QUALIFIER) \
+          _Pragma("GCC diagnostic warning \"-Wcast-qual\"") \
+          (x); \
+        _Pragma("GCC diagnostic pop") \
+      })
+
+  #define CPP_CHECK_COMPAT_CAST_BASE(res_cast, Type, x) \
+      __extension__ ({ \
+          __typeof__(CPP_UN_CAST(CPP_V_DECAY(x))) _decayed = CPP_UN_CAST(x); \
+          __typeof__(Type) _inited = _decayed; \
+          __typeof__(Type) _casted = (Type) _decayed; \
+          (void)_decayed, (void)_inited, res_cast _casted; \
+      })
+  #define CPP_CHECK_COMPAT_CAST(Type, x)  \
+      CPP_CHECK_COMPAT_CAST_BASE(, Type, x)
+
+  #define CPP_CHECK_COMPAT_CAST_CONST(Type, x)  \
+      CPP_CHECK_COMPAT_CAST_BASE((Type), CPP_CP_T(Type), x)
+
+  /* Cannot be used as an argument other `*_CAST()`s when compiled with GCC */
+  #define CONST_CAST(Type, ptr)  \
+      __extension__ ({ \
+        _Pragma("GCC diagnostic push") \
+          _Pragma("GCC diagnostic warning \"-Wwrite-strings\"") \
+          _Pragma("GCC diagnostic error \"-Wpointer-sign\"") \
+          CPP_PRAGMA_DX_SOFT_ERROR_W_INCOMPAT_PTR_TYPE() \
+          CPP_PRAGMA_DX_SET_W(ignored CPP_PRAGMA_DX_W_DISCARD_QUALIFIER) \
+          _Pragma("GCC diagnostic ignored \"-Wcast-qual\"") \
+          CPP_CHECK_COMPAT_CAST_CONST(Type, &*(ptr)); \
+        _Pragma("GCC diagnostic pop") \
+      })
+
+  /* Cannot be used as an argument to other `*_CAST()`s when compiled with GCC */
+  #define STATIC_CAST(Type, x)  \
+      __extension__ ({ \
+        _Pragma("GCC diagnostic push") \
+          _Pragma("GCC diagnostic error \"-Wwrite-strings\"") \
+          _Pragma("GCC diagnostic error \"-Wpointer-sign\"") \
+          _Pragma("GCC diagnostic error \"-Wincompatible-pointer-types\"") \
+          CPP_PRAGMA_DX_SET_W(error CPP_PRAGMA_DX_W_DISCARD_QUALIFIER) \
+          _Pragma("GCC diagnostic error \"-Wcast-qual\"") \
+          CPP_CHECK_COMPAT_CAST(Type, x); \
+        _Pragma("GCC diagnostic pop") \
+      })
+
+  /* Cannot be used as an argument to other `*_CAST()`s when compiled with GCC */
+  #define REINTERPRET_CAST(Type, ptr)  \
+      __extension__ ({ \
+        _Pragma("GCC diagnostic push") \
+          _Pragma("GCC diagnostic warning \"-Wwrite-strings\"") \
+          _Pragma("GCC diagnostic ignored \"-Wpointer-sign\"") \
+          _Pragma("GCC diagnostic ignored \"-Wincompatible-pointer-types\"") \
+          CPP_PRAGMA_DX_SET_W(error CPP_PRAGMA_DX_W_DISCARD_QUALIFIER) \
+          _Pragma("GCC diagnostic error \"-Wcast-qual\"") \
+          CPP_CHECK_COMPAT_CAST(Type, &*(ptr)); \
+        _Pragma("GCC diagnostic pop") \
+      })
+#else
+  #define CONST_CAST(Type, ptr)  (Type)(&*(ptr))
+  #define STATIC_CAST(Type, x)  (Type)(x)
+  #define REINTERPRET_CAST(Type, ptr)  (Type)(&*(ptr))
+#endif
+
+#ifdef CPP_V_TYPEOF
+  #define INOUT_RET(srcptr, funccall)  (CPP_V_TYPEOF(&*(srcptr)))(funccall)
+  #define INOUT_ARG(srcptr, pdestptr)  \
+    ((void)(sizeof (STATIC_CAST(CPP_V_TYPEOF(*(pdestptr)), &*(srcptr)))), \
+      CONST_CAST(CPP_V_PP_T(pdestptr), pdestptr))
+#else
+  #define INOUT_RET(srcptr, funccall)  funccall
+  #define INOUT_ARG(srcptr, pdestptr)  pdestptr
+#endif
+
+/* User header code */
+
+char *CPP_ORIG(strhead)(const char *str);
+#define strhead_MACRO(str)  INOUT_RET(str, CPP_ORIG(strhead)(str))
+#define ustrhead_MACRO(ustr)  \
+    INOUT_RET(ustr, \
+      CPP_ORIG(strhead)((const char *)(STATIC_CAST(const unsigned char *, ustr))))
+#define strhead(str)  strhead_MACRO(str)
+#define ustrhead(str)  ustrhead_MACRO(str)
+
+void CPP_ORIG(strhead_ptr)(const char *str, char **p);
+#define strhead_ptr_MACRO(str, p)  CPP_ORIG(strhead_ptr)(str, INOUT_ARG(str, p))
+#define ustrhead_ptr_MACRO(ustr, up)  \
+    CPP_ORIG(strhead_ptr)((const char *)(STATIC_CAST(const unsigned char *, ustr)), \
+      (char **)(INOUT_ARG(ustr, up)))
+#define strhead_ptr(str, p)  strhead_ptr_MACRO(str, p)
+#define ustrhead_ptr(str, p)  ustrhead_ptr_MACRO(str, p)
+
+/* User source code */
+
+char *CPP_ORIG(strhead)(const char *str)
+{
+    return CONST_CAST(char *, str);
+}
+
+void CPP_ORIG(strhead_ptr)(const char *str, char **p)
+{
+    *p = CONST_CAST(char *, str);
+}
+
+/* User code */
+
+#define STRCHR_TEST  1
+
+int main(void)
+{
+    char str[] = "strchr", *ptr;
+    const char cstr[] = "strchr", *cptr;
+    unsigned char ustr[] = "strchr", *uptr;
+    const unsigned char custr[] = "strchr", *cuptr;
+
+    *strhead(str) = 'd';
+    strhead_ptr(str, &ptr);
+    strhead_ptr(str, &cptr);  /* Type warning (GCC C) or error (C++98) */
+#if STRCHR_TEST
+    ustrhead(str);  /* 1: Type error */
+    ustrhead_ptr(str, &ptr);  /* 2: Type error */
+    ustrhead_ptr(str, &cptr);  /* 3: Type error */
+#endif
+
+#if STRCHR_TEST || !defined __cplusplus
+    *strhead(ustr) = 'd';  /* 4: Type warning (C) or error (C++) */
+    strhead_ptr(ustr, &uptr);  /* 5: Type warning (C) or error (C++) */
+    strhead_ptr(ustr, &cuptr);  /* 6: Type warning (C) or error (C++) */
+#endif
+    *ustrhead(ustr) = 'd';
+    ustrhead_ptr(ustr, &uptr);
+    ustrhead_ptr(ustr, &cuptr);  /* Type warning (GCC C) */
+
+#if STRCHR_TEST
+    *strhead(cstr) = 'd';  /* 7: Assignment error (GNU C90+, ISO C++11+) */
+    strhead_ptr(cstr, &ptr);  /* 8: Constness error (C, C++11+) */
+#endif
+    strhead_ptr(cstr, &cptr);  /* Type warning (GCC C) or error (C++98) */
+
+#if STRCHR_TEST
+    *ustrhead(custr) = 'd';  /* 9: Assignment error (GNU C90+, ISO C++11+) */
+    ustrhead_ptr(custr, &uptr);  /* 10: Constness error (C, C++11+) */
+#endif
+    ustrhead_ptr(custr, &cuptr);  /* Type warning (GCC C) */
+
+    return 0;
+}

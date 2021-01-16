@@ -1,0 +1,92 @@
+﻿REMOVE_FIRST_struct  0, SELECT2_0)(
+
+REMOVE_FIRST(struct X)
+SELECT2_1(REMOVE_FIRST_struct X, struct X)
+SELECT2_1(0, SELECT2_0)(X, struct X)
+SELECT2_0(X, struct X)
+X
+
+REMOVE_FIRST(union X)
+SELECT2_1(REMOVE_FIRST_union X, union X)
+union X
+
+
+FETCH_FIRST_const  0, SELECT3_0)(const,
+
+FETCH_FIRST(const int)
+SELECT2_1(FETCH_FIRST_const int, 0)
+SELECT2_1(0, SELECT3_0)(const, int, 0)
+SELECT3_0(const, int, 0)
+const
+
+FETCH_FIRST(volatile int)
+SELECT2_1(FETCH_FIRST_volatile int, 0)
+0
+
+
+X_REMOVE_LAST  , 0, SELECT2_0)IGN3(0
+
+REMOVE_LAST(int X)
+INVOKE3_2(int X_REMOVE_LAST, int X, SELECT2_1)
+INVOKE3_2(int , 0, SELECT2_0)IGN3(0, int X, SELECT2_1)
+SELECT2_0(int , 0)
+int
+
+REMOVE_LAST(int Y)
+INVOKE3_2(int Y_REMOVE_LAST, int Y, SELECT2_1)
+SELECT2_1(int Y_REMOVE_LAST, int Y)
+int Y
+
+
+X_FETCH_LAST  0, SELECT2_0)(X
+
+FETCH_LAST(struct X)
+SELECT2_1(struct X_FETCH_LAST, 0)
+SELECT2_1(struct 0, SELECT2_0)(X, 0)
+SELECT2_0(X, 0)
+X
+
+FETCH_LAST(struct Y)
+SELECT2_1(struct Y_FETCH_LAST, 0)
+0
+
+
+
+REMOVE_FIRST_PARENED((int)(unsigned)(X))
+SELECT2_1(REMOVE_FIRST_PARENED_IGN(int)(unsigned)(X), (int)(unsigned)(X))
+SELECT2_1(REMOVE_FIRST_PARENED_T(unsigned)(X), (int)(unsigned)(X))
+SELECT2_1(0, SELECT_2_0)((unsigned)(X), (int)(unsigned)(X))
+SELECT2_0((unsigned)(X), (int)(unsigned)(X))
+(unsigned)(X)
+
+REMOVE_FIRST_PARENED((X))
+SELECT2_1(REMOVE_FIRST_PARENED_IGN(X), (X))
+SELECT2_1(REMOVE_FIRST_PARENED_T, (X))
+(X)
+
+
+FETCH_FIRST_PARENED((int)(unsigned)(X))
+INVOKE3_2(FETCH_FIRST_PARENED_NEXT(int)(unsigned)(X), 0, SELECT2_1)
+INVOKE3_2((int)FETCH_FIRST_PARENED_T(unsigned)(X), 0, SELECT2_1)
+INVOKE3_2((int), 0, SELECT2_0)IGN3((unsigned)(X), 0, SELECT2_1)
+SELECT2_0((int), 0)
+(int)
+
+FETCH_FIRST_PARENED((X))
+INVOKE3_2(FETCH_FIRST_PARENED_NEXT(X), 0, SELECT2_1)
+INVOKE3_2((X)FETCH_FIRST_PARENED_T, 0, SELECT2_1)
+SELECT2_1((X)FETCH_FIRST_PARENED_T, 0)
+0
+
+
+REMOVE_LAST_PARENED((int)(unsigned)(X))
+
+REMOVE_LAST_PARENED((X))
+
+FETCH_LAST_PARENED((int)(unsigned)(X))
+INVOKE3_0(SELECT2_1, FETCH_LAST_PARENED_GROUP_NEXT((int)(unsigned)(X)), (int)(unsigned)(X))
+INVOKE3_0(SELECT2_1, (IGN1(int)(unsigned)(X))FETCH_LAST_PARENED_NEXT(int)(unsigned)(X), (int)(unsigned)(X))
+INVOKE3_0(SELECT2_1, ((unsigned)(X)), FETCH_LAST_PARENED_T(unsigned)(X), (int)(unsigned)(X))
+INVOKE3_0(SELECT2_1, ((unsigned)(X)), SELECT2_0((unsigned)(X), (int)(unsigned)(X))
+
+FETCH_LAST_PARENED((X))

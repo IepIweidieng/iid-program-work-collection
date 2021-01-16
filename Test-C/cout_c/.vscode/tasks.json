@@ -1,0 +1,66 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build release gcc",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/gcc -std=c99 -Wall -Wextra -Wpedantic -o ${fileBasenameNoExtension}.out ${fileBasename}"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "build debug gcc",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/gcc -g -std=c99 -Wall -Wextra -Wpedantic -o ${fileBasenameNoExtension}.out ${fileBasename}"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "build release clang",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/clang -std=c99 -Wall -Wextra -Wpedantic -Weverything -o ${fileBasenameNoExtension}.out ${fileBasename}"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "build debug clang",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/clang -g -std=c99 -Wall -Wextra -Wpedantic -Weverything -o ${fileBasenameNoExtension}.out ${fileBasename}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "silent"
+            },
+            "problemMatcher": "$gcc"
+        }
+    ]
+}

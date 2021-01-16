@@ -1,0 +1,102 @@
+#include <iostream>
+
+using namespace std;
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    short c[1001] = {};
+    short num[1000] = {};
+    int num_c = 0;
+
+    for (int k = 0, kn = n*n; k < kn; ++k) {
+        short ai;
+        cin >> ai;
+        if (!c[ai]) { num[num_c++] = ai; }
+        ++ c[ai];
+    }
+
+    int corner_count = (n/2) * (n/2);
+    int mid_count = (n%2) ? (n-1) : 0;
+    int center_count = !!(n%2);
+
+    short *corner_num = (corner_count) ? new short[corner_count] : NULL;
+    short *mid_num = (mid_count) ? new short[mid_count] : NULL;
+    short center_num;
+
+    for (int k = 0; k < num_c; ++k) {
+        int corner_fill_count = min(c[num[k]] / 4, corner_count);
+        c[num[k]] -= 4 * corner_fill_count;
+        while (corner_fill_count--) {
+            corner_num[--corner_count] = num[k];
+        }
+
+        int mid_fill_count = min(c[num[k]] / 2, mid_count);
+        c[num[k]] -= 2 * mid_fill_count;
+        while (mid_fill_count--) {
+            mid_num[--mid_count] = num[k];
+        }
+
+        if (c[num[k]] && center_count) {
+            center_num = num[k];
+            --c[num[k]];
+            --center_count;
+        }
+
+        if (!c[num[k]]) { continue; }
+
+        cout << "NO\n";
+        goto end_label;
+    }
+
+    {
+        cout << "YES\n";
+
+        const char sp[] = " ";
+        bool isp;
+
+        for (int k = 0; k < n/2; ++k) {
+            isp = false;
+            for (int k = 0; k < n/2; ++k) {
+                cout << &sp[!isp++] << corner_num[corner_count++];
+            }
+            if (n%2) { cout << &sp[!isp++] << mid_num[mid_count++]; }
+            for (int k = 0; k < n/2; ++k) {
+                cout << &sp[!isp++] << corner_num[--corner_count];
+            }
+            corner_count += n/2;
+            cout << '\n';
+        }
+        if (n%2) {
+            isp = false;
+            for (int k = 0; k < n/2; ++k) {
+                cout << &sp[!isp++] << mid_num[mid_count++];
+            }
+            cout << &sp[!isp++] << center_num;
+            for (int k = 0; k < n/2; ++k) {
+                cout << &sp[!isp++] << mid_num[--mid_count];
+            }
+            cout << '\n';
+        }
+        for (int k = 0; k < n/2; ++k) {
+            isp = false;
+            corner_count -= n/2;
+            for (int k = 0; k < n/2; ++k) {
+                cout << &sp[!isp++] << corner_num[corner_count++];
+            }
+            if (n%2) { cout << &sp[!isp++] << mid_num[--mid_count]; }
+            for (int k = 0; k < n/2; ++k) {
+                cout << &sp[!isp++] << corner_num[--corner_count];
+            }
+            cout << '\n';
+        }
+    }
+
+  end_label:
+    delete[] mid_num;
+    delete[] corner_num;
+
+    return 0;
+}

@@ -1,0 +1,100 @@
+#! /usr/bin/env python3
+'''switch.py
+A implement of `switch/case` statement
+   with explicit fallthrough semantics
+Written by Iweidieng Iep on 2019-7-6
+'''
+
+class switch:
+    def __init__(self, cond):
+        switch.__cond = cond
+        switch.__case_func = {}
+        switch.__default_func = lambda x: x
+        switch.__case_curr = []
+        switch.__is_fallthru = False
+    def __enter__(self): pass
+    def __exit__(self, type, value, traceback): endswitch()
+
+def endswitch():
+    switch._switch__case_func.get(
+      switch._switch__cond, switch._switch__default_func
+    )(switch._switch__cond)
+
+def case(*objs):
+    if switch._switch__is_fallthru:
+        switch._switch__case_fallthru.extend(switch._switch__case_curr)
+        switch._switch__is_fallthru = False
+    else:
+        switch._switch__case_fallthru = switch._switch__case_curr
+    switch._switch__case_curr = list(objs)
+    def res(func):
+        for v in objs:
+            switch._switch__case_func.setdefault(v, func)
+        return func
+    return res
+
+def default(func):
+    if switch._switch__is_fallthru:
+        switch._switch__case_fallthru.extend(switch._switch__case_curr)
+        switch._switch__is_fallthru = False
+    else:
+        switch._switch__case_fallthru = switch._switch__case_curr
+    switch._switch__default_func = func
+    return func
+
+def fallthrough(func):
+    switch._switch__is_fallthru = True
+    for case in switch._switch__case_fallthru:
+        def func_combine(func_orig, func_new):
+            def res(x):
+                func_orig(x)
+                return func_new(x)
+            return res
+        switch._switch__case_func[case] = func_combine(
+              switch._switch__case_func[case], func)
+    return func
+
+class case_return(Exception):
+    def __init__(self, *obj):
+        if len(obj) == 1: self.value, = obj
+        else: self.value = obj
+
+import sys
+
+def main(*args):
+    val = int(args[0])
+    try:
+     with switch(val):
+        @case(5)
+        def _(_): print(5)
+        @fallthrough
+        @case(4, 3, 2, 1, 42)
+        def _(_):
+            nonlocal val
+            if val != 42: val = 4
+            with switch(val):
+                @case(42)
+                def _(_): raise case_return('The answer')
+                @case(4)
+                def _(_): print(4)
+                @fallthrough
+                @case(3)
+                def _(_): print(3)
+                @fallthrough
+                @case(2)
+                def _(_): print(2)
+                @fallthrough
+                @case(1)
+                def _(_): print(1)
+        @fallthrough
+        @case(0, 5)
+        def _(_): print(0)
+        @default
+        def _(_): raise case_return(main(5))
+    except case_return as e:
+        return e.value
+
+    return val
+
+if __name__ == '__main__':
+    print(main(*sys.argv[1:]))

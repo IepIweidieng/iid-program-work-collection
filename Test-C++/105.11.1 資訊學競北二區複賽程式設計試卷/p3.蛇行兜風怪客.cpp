@@ -1,0 +1,2 @@
+#include <iostream>
+int main(){int n, m; return std::cin>> n>> m, std::cout<< (n==1|| m==1)*(2+(n*m<2)*(n*m-2))+(n!=1&& m!=1)*(n*m+(n>2&& m>2)*(3-n-m+((n+m)&1)*(n+(m&1)*(m-n)-2)+!(n&1|| m&1)*(n+(m>n)*(m-n)-1)))<< '\n', 0;}

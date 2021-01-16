@@ -1,0 +1,70 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build release g++",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/g++ -std=c++11 -Wall -Wextra -Wpedantic -o ${fileBasenameNoExtension}.out ${fileBasename}"
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard GCC compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "build debug g++",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/g++ -g -std=c++98 -Wall -Wextra -Wpedantic -o ${fileBasenameNoExtension}.out ${fileBasename} nvwa/debug_new.cpp"
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard GCC compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$gcc"
+        },        {
+            "label": "build release clang++",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/clang++ -std=c++11 -Wall -Wextra -Wpedantic -o ${fileBasenameNoExtension}.out ${fileBasename}"
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard GCC compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$gcc"
+        },
+        {
+            "label": "build debug clang++",
+            "type": "shell",
+            "command": "${env:windir}\\system32\\bash.exe",
+            "args": [
+                "-c",
+                "/usr/bin/clang++ -g -std=c++98 -Wall -Wextra -Wpedantic -o ${fileBasenameNoExtension}.out ${fileBasename} nvwa/debug_new.cpp"
+            ],
+            "group": "build",
+            "presentation": {
+                // Reveal the output only if unrecognized errors occur.
+                "reveal": "silent"
+            },
+            // Use the standard GCC compiler pattern to detect errors, warnings and infos
+            "problemMatcher": "$gcc"
+        },
+    ]
+}

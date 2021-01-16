@@ -1,0 +1,35 @@
+strchr_test.c
+
+`strchr` 問題：
+
+`strchr()` 是給定一個 string 和字元，回傳指向 string 中的指定字元的 pointer 的函數。
+如果傳進的 string 是 non-const 的，回傳的 pointer 是指向 non-const 字元的型別，可以透過 pointer 修改 string。
+但是如果傳進的 string 是 const 的，而回傳 pointer 是指向 non-const 資料的型別的話，就會造成使用者可以透過回傳值改變 const 字串的問題。如果這個 const string 是存放在程式禁止使用者寫入的地方的話，就會造成 segmentation fault。
+
+C++ 使用 function overloading 來解決這個問題。
+C++ 在 `<cstring>` header 中定義了兩個 `strchr()` ，它們的 prototype 分別是：
+<cstring>
+   `const char* strchr(const char* string, int c);`
+   `      char* strchr(      char* string, int c);`
+
+C 不支援 function overloading，所以不能透過 argument 的型別控制回傳的型別。
+C 的 `strchr()` 的 prototype 是：
+<string.h>
+   `char *strchr(const char *string, int c)`
+（用 `int c` 是因為 C 的 character literal, e.g., `'c'`, 型別是 `int`，但在 C++ 中是 `char`）
+（在 C++ 中 include <string.h> 的話，會使用 C 的 `strchr()` 版本）
+
+用 GNU C extension、C99 `_Pragma`、以及編輯器警告系統，實作了分別模仿 C++ 的 `const_cast`, `static_cast`, 以及 `reinterpret_cast` 的 `CONST_CAST()`, `STATIC_CAST()`, 以及 `REINTERPRET_CAST()` macros。
+缺陷是跳出的 warning 和 error 訊息太長，不過可以對 gcc 指定 `-ftrack-macro-expansion=0`，或是對 clang 指定 `-fmacro-backtrace-limit=1` 來縮短 macro 展開的輸出；
+在 gcc 編譯器上使用 `CONST_CAST()` 轉換不相容的指標時，會跳出警告而不是錯誤，因為 gcc 也會對只有 cv-qualifier 不相同的轉換提出相同的警告，會造成誤判，所以不能直接跳出錯誤；
+還有把某個 `*_CAST()` 當成別的 `*_CAST()` 的參數時，用 gcc 編譯器 preprocessing 時會造成編譯警告設定不正確（可參見 https://mort.coffee/home/c-compiler-quirks/）。
+如果用 C++ 編譯的話，則會直接使用內建的 `*_cast` operators。
+
+實作了類似 D 語言 `inout` 的 `INOUT_RET()` 和 `INOUT_PTRARG()` macros，用以處理兩種 `strchr` 問題（傳入字串，不更改字串，而傳出指向字串一部分的指標時的型別問題）：
+char* func(const char *src) （直接回傳結果）
+使用 `INOUT_RET(src, ...)` 將結果轉成 `src` 的型別
+如果指標 `src` 不能修改指向的內容，這樣傳出的指標也會不能修改指向的內容
+void func(const char *src, char **ptr) （透過指標參數 `ptr` 傳出結果；`strtol` 問題）
+使用 `INOUT_PTRARG(src, ptr)` 來檢查應不應該讓 `ptr` 指向 `src`
+如果指標 `src` 不能修改指向的內容，這樣 `*ptr` 也會不能修改指向的內容
+主要是利用 GNU C extension 的 `__typeof__` 或 ISO C++11 的 `decltype` 取得型別資訊，然後利用 `*_CAST` 的檢查機制檢查參數型別正不正確。

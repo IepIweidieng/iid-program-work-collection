@@ -1,0 +1,173 @@
+*   "Important change"
+  + "New stuff"
+  - "Removed stuff"
+
+
+In all files:
+        NULL → nullptr
+
+
+In all head files:
+        All head files now include "debug.h" excluding "debug.h" itself.
+
+
+In debug.h
+  + debug.h
+        The preprocessor commands about debugging has been moved here.
+
+  + #define DEBUG_OUTPUT(str) DEBUG(std::cout<<str)
+        A new macro as syntactic sugar to replace syntax "DEBUG(just_for_debug(str);)".
+
+
+In factory.h & factory.cpp:
+*   ball object::_i → ball *object::_i
+        The data member has become a pointer to avoid unnecessary copying at initialization.
+
+    object::object()
+        All member valuables are now initialized in the member initialization list.
+
+*  object::object(pos _center,vec _c_v,char *type_str)
+        All member valuables are now initialized in the member initialization list.
+    *   object::kid_num is now set regardless of object::type. (IMPORTANT CHANGE)
+
+*  void object::object_initialize(char *type_str,int &cur_pos)
+    *   object::kid_num is now set regardless of object::type. (IMPORTANT CHANGE)
+
+* + object::object(const object &val)
+    *   A new function for correct copying. (THE VERY IMPORTANT CHANGE)
+
+* + object &object::operator=(const object &val)
+    *   A new function for correct assigning. (IMPORTANT CHANGE)
+
+*   object::~object()
+    *   The delete operators for the pointer members has been changed in response to their allocation method. (IMPORTANT CHANGE)
+
+    void object::draw(SDL_Renderer* pRenderer)
+        The function has been changed in respond to the type change of "ball *object::_i".
+
+    factory* factory::initial_factory() → static factory* factory::get_factory()
+        The function is now static so that it can be accessed under the global scope.
+        The name of the function has been changed.
+
+    player* factory::get_player()
+        Initialize the local valuable "player *p" as the return value of function "player::init_player(player_ball)".
+        The player object is now constructed here.
+
+    mulan_missle* factory::get_mulan_missle(double x=0,double y=0) → mulan_missle* factory::get_mulan_missle(double x=0,double y=0)
+
+  + static int factory::factory_count
+        New valuables for dynamically detecting probable memory leaks.
+
+  + static int &factory::ball_count = ball::ball_num
+  + static int &factory::player_count = static int player::player_num
+  + static int &factory::mulan_missle_count = mulan_missle::mis_amount
+        New reference for dynamically detecting probable memory leaks.
+
+  + static void factory::check_products()
+        A new debugging function for dynamically detecting probable memory leaks.
+
+
+In ball.h & ball.cpp:
+    class ball
+        The class now has a friend class, "class factory".
+
+    ball::ball()
+        The constructor has been protected now to force you to use the factory instead.
+        static int factory::ball_count will now be increased by 1.
+
+* + ball(const ball &_val)
+    *   A new function for correct copying.
+        static int factory::ball_count & static int ball::ball_num will now be increased by 1.
+
+* + ball &ball::operator=(const ball& _val)
+    *   A new function for correct assigning. (IMPORTANT CHANGE)
+
+    ball::~ball()
+        static int factory::ball_count will now be decreased by 1.
+
+    pos ball::get_pos()
+        The return value is now initialized with aggregate initialization.
+
+
+In game.cpp:
+    game::game()
+        All member valuables are now initialized in the member initialization list.
+
+*   game::~game()
+    *   The destructor now clears the data member "vector<object> game::mlm_eve" to a resolve memory leak.
+    +   The function now calls "static void factory::check_products()".
+
+    void game::drawR()
+        The process of iterating object is now correct.
+
+
+In player.h & player.cpp
+    class player
+        The class now has a friend class, "class factory".
+
+  + static int player::player_num
+        A new valuable for dynamically detecting probable memory leaks.
+
+    player::player* init_player(ball *p) → static player* player::get_player()
+        The player object is no longer constructed here, and needs no arguments.
+        The name of the function has been changed.
+
+    player::player(ball *p) → explicit player::player(ball *p)
+        static int factory::player_count will now be increased by 1.
+
+*   player::~player()
+    *   The delete operator for "ball *player::player1" has been changed in response to allocation method. (IMPORTANT CHANGE)
+        static int factory::player_count will now be decreased by 1.
+
+    void player::move_update(double V,bool dir[4])
+        vec cur_v(0,0); → vec cur_v{0,0};
+        The syntax of the initialization of valuable "vec cur_v" has been changed.
+
+
+In mulan_missle.h & mulan_missle.cpp
+    mulan_missle.h
+        The inclusion of head file "ball.h" has been replaced by the inclusion of "patterns.h".
+
+    mulan_missle.cpp
+        The preprocessor commands about debugging has been moved to head file "debug.h".
+        The inclusion of head file "patterns.h" has been canceled.
+
+    class mulan_missle
+        The class is no longer derived from class ball.
+        The class now has a friend class, "class factory".
+        The private section has been reformatted.
+
+    static unsigned int mis_amount → static int mis_amount
+        The static valuable is now private.
+        The valuable has been changed to signed integer now to catch some probable abnormal memory leakage cases.
+
+  - mulan_missle::mulan_missle()
+        The function is no longer available.
+        Please use function "mulan_missle::mulan_missle(double _x, double _y)" instead.
+
+    mulan_missle::mulan_missle(double _x, double _y)
+        All member valuables are now initialized in the member initialization list.
+        The constructors are now protected to force you to use the factory instead.
+
+    mulan_missle::mulan_missle(const mulan_missle &_val)
+        All member valuables are now initialized in the correct order in the member initialization list.
+
+    void mulan_missle::missle_initialize(double p_x, double p_y)
+        The position of the comment is moved to a better place.
+
+
+In patterns.h & pattern.cpp
+*   struct pos
+    *   The user-defined constructor has been removed to make the class a POD type.
+        The definition of the class has been reformatted.
+
+    pos::pos(double _x, double _y) → pos to_pos(double _x, double _y)
+        The formal constructor is now a function to make the class "struct pos" a POD type.
+
+*   class vec → struct vec
+    *   The user-defined constructor has been removed to make the class a POD type.
+        The keyword has been changed.
+        The definition of the class has been reformatted.
+
+    vec::vec(double _x, double _y) → vec to_vec(double _x, double _y)
+        The formal constructor is now a function to make the class "struct vec" a POD type.

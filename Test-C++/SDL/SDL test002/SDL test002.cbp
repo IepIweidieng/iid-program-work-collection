@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="SDL test002" />
+		<Option pch_mode="2" />
+		<Option compiler="gnu_gcc_compiler_for_sdl" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/SDL test002" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler_for_sdl" />
+				<Compiler>
+					<Add option="-g" />
+					<Add directory="src" />
+					<Add directory="src/h" />
+					<Add directory="lib" />
+				</Compiler>
+				<ExtraCommands>
+					<Add after="cmd /c copy /Y dll\* bin\Debug\" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/SDL test002" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler_for_sdl" />
+				<Compiler>
+					<Add option="-O3" />
+					<Add directory="src" />
+					<Add directory="src/h" />
+					<Add directory="lib" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+				<ExtraCommands>
+					<Add after="cmd /c copy /Y dll\* bin\Release\" />
+					<Mode after="always" />
+				</ExtraCommands>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++11" />
+			<Add option="-g" />
+			<Add option="-fexceptions" />
+			<Add directory="../SDL2-2.0.9/x86_64-w64-mingw32/include/SDL2" />
+			<Add directory="../SDL2_image-2.0.4/x86_64-w64-mingw32/include/SDL2" />
+			<Add directory="../SDL2_gfx-1.0.4" />
+			<Add directory="../SDL2-2.0.9/i686-w64-mingw32/include/SDL2" />
+			<Add directory="../SDL2_image-2.0.4/i686-w64-mingw32/include/SDL2" />
+		</Compiler>
+		<Linker>
+			<Add option="-lmingw32 -lSDL2main -lSDL2 -lSDL2_image" />
+			<Add directory="../SDL2-2.0.9/x86_64-w64-mingw32/lib" />
+			<Add directory="../SDL2_image-2.0.4/x86_64-w64-mingw32/lib" />
+			<Add directory="../SDL2-2.0.9/i686-w64-mingw32/lib" />
+			<Add directory="../SDL2_image-2.0.4/i686-w64-mingw32/lib" />
+		</Linker>
+		<Unit filename="lib/SDL2_framerate.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lib/SDL2_gfxPrimitives.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lib/SDL2_imageFilter.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="lib/SDL2_rotozoom.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="main.cpp" />
+		<Unit filename="src/coordinate.cpp" />
+		<Unit filename="src/debug.cpp" />
+		<Unit filename="src/game.cpp" />
+		<Unit filename="src/game_setting.cpp" />
+		<Unit filename="src/h/coordinate.h" />
+		<Unit filename="src/h/debug.h" />
+		<Unit filename="src/h/game.h" />
+		<Unit filename="src/h/game_setting.h" />
+		<Unit filename="src/h/keymap.h" />
+		<Unit filename="src/h/physical_object.h" />
+		<Unit filename="src/keymap.cpp" />
+		<Unit filename="src/physical_object.cpp" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -1,0 +1,42 @@
+Fixed memory leaking in "inline void game::mouse_eve()".
+
+Commented 100ms delays after clicking mouse.
+
+Added member "color" to the Initializing list of "ball::ball()".
+
+Added a initializer "ball::pos(double _x = 0, double _y = 0)".
+
+Rewrote "double* ball::get_pos()" to "typename ball::pos ball::get_pos()"
+  because the previous return value is invalid
+  (return a address of a array that will be deleted when exits the function).
+
+Rewrote part of "inline void game::con_key_eve()",
+  "inline void game::mouse_eve()",
+  and "void mlm::single_twin_update(double V,int num)"
+  that related with "pos ball::get_pos()".
+
+Added "typedef ball::pos pos" to "src\game.cpp"
+
+Added members "pWindow", "pRenderer", "mlm_eve", "StartingTime", "EndingTime",
+  "ElapsedMicroseconds", "Frequency" to the Initializing list of "ball::ball()"
+  and rearranged the order.
+
+Overrode "game::game(game const &)"
+  and "game::game &operator=(game const &)"
+  to private.
+
+Overrode "mulan_missle::mulan_missle(mulan_missle const &_val)"
+  and "mulan_missle &mulan_missle::operator=(mulan_missle const &_val)"
+  to avoid accessing deleted "ball* twins".
+
+Renamed the names of the parameters of "mulan_missle::mulan_missle(double x,double y)"
+  to "double _x, double _y" to avoid shadowing issue.
+
+Added members "mass_heart", "vec", "twins", tw_v"
+  to the Initializing list of "mulan_missle::mulan_missle(double _x, double _y)"
+
+Rewrote "mulan_missle::mulan_missle(double _x, double _y)"
+  and "mulan_missle::mulan_missle()".
+
+Renamed the names of the parameters of "bool mlm::is_out_of_boarder(int x,int y)"
+  to "int _x, int _y" to avoid shadowing issue.
